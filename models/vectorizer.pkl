@@ -1,0 +1,37 @@
+import pandas as pd
+import string
+import pickle
+from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk
+from nltk.corpus import stopwords
+import os
+
+# Create models folder if not exists
+os.makedirs("models", exist_ok=True)
+
+# Download stopwords
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
+
+# Load dataset
+df = pd.read_csv('spam.csv', encoding='latin-1')
+df = df[['v1', 'v2']]
+df.columns = ['label', 'message']
+
+# Preprocessing
+def preprocess(text):
+    text = text.lower()
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    text = " ".join([w for w in text.split() if w not in stop_words])
+    return text
+
+df["message_clean"] = df["message"].apply(preprocess)
+
+# Fit vectorizer
+vectorizer = TfidfVectorizer()
+vectorizer.fit(df["message_clean"])
+
+# Save vectorizer
+pickle.dump(vectorizer, open("models/vectorizer.pkl", "wb"))
+
+print("vectorizer.pkl created successfully!")

@@ -1,0 +1,55 @@
+import pandas as pd
+import string
+import pickle
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
+import nltk
+from nltk.corpus import stopwords
+import os
+
+# Ensure models folder exists
+os.makedirs("models", exist_ok=True)
+
+# Download stopwords
+nltk.download('stopwords')
+stop_words = set(stopwords.words('english'))
+
+# Load dataset
+df = pd.read_csv('spam.csv', encoding='latin-1')
+df = df[['v1', 'v2']]
+df.columns = ['label', 'message']
+
+# Clean text
+def preprocess(text):
+    text = text.lower()
+    text = text.translate(str.maketrans('', '', string.punctuation))
+    text = " ".join([w for w in text.split() if w not in stop_words])
+    return text
+
+df["message_clean"] = df["message"].apply(preprocess)
+
+# Load vectorizer
+vectorizer = pickle.load(open("models/vectorizer.pkl", "rb"))
+
+# Transform text
+X = vectorizer.transform(df["message_clean"])
+y = df["label"]
+
+# Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
+model = MultinomialNB()
+model.fit(X_train, y_train)
+
+# Accuracy
+y_pred = model.predict(X_test)
+print("Model Accuracy:", accuracy_score(y_test, y_pred))
+
+# Save model
+pickle.dump(model, open("models/spam_model.pkl", "wb"))
+
+print("spam_model.pkl created successfully!")
