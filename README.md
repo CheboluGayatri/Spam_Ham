@@ -90,7 +90,7 @@ User friendly input validation
 
 # 🛠️ Installation and Setup
 1️⃣ Clone the Repository
-git clone <repository-url>
+git clone <https://github.com/CheboluGayatri/Spam_Ham.git>
 cd Spam_Ham
 2️⃣ Install Dependencies
 pip install -r requirements.txt
